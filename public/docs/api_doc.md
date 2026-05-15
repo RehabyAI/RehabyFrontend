@@ -1,27 +1,39 @@
-# API Documentation
+# Rehaby - Backend API Documentation
 
-PART 2
-FastAPI Backend API Documentation
-This is the contract between the backend team (Ammara, Mohammed) and the frontend team. All endpoints listed here must be implemented exactly as specified.
+**FastAPI Backend API Specification**
 
-Base Configuration
-Base URL:     http://localhost:8000
-CORS:         Allow http://localhost:5173 (Vite dev server)
-Content-Type: application/json
-Auth:         None for hackathon (no tokens needed)
+This document serves as the contract between the backend team (Ammara, Mohammed) and the frontend team. All endpoints listed here must be implemented exactly as specified.
 
-Endpoint 1 — Start Session
-POST /start-session
-Called when patient submits intake form. Creates a new session record.
+---
 
-Request Body
+## Base Configuration
+
+- **Base URL:** `http://localhost:8000`
+- **CORS:** Allow `http://localhost:5173` (Vite dev server)
+- **Content-Type:** `application/json`
+- **Auth:** None for hackathon (no tokens needed)
+
+---
+
+## API Endpoints
+
+### 1. Start Session
+`POST /start-session`
+
+Called when the patient submits the intake form. Creates a new session record.
+
+#### Request Body
+```json
 {
   "patient_name": "string",
   "condition": "string",
   "pain_level": 7,              // integer 1-10
   "exercise_type": "shoulder_raise"  // enum: shoulder_raise | knee_bend | hip_flex
 }
-Response 200
+```
+
+#### Response (200 OK)
+```json
 {
   "session_id": "abc123",
   "patient_id": "p_001",
@@ -29,22 +41,30 @@ Response 200
   "started_at": "2026-05-15T10:00:00Z",
   "status": "active"
 }
+```
 
-Endpoint 2 — Analyze Frame
-POST /analyze-frame
-Core real-time endpoint. Frontend sends pose landmarks every 500ms. Backend returns score, feedback, rep count.
+---
 
-Request Body
+### 2. Analyze Frame
+`POST /analyze-frame`
+
+Core real-time endpoint. Frontend sends pose landmarks every 500ms. Backend returns score, feedback, and rep count.
+
+#### Request Body
+```json
 {
   "session_id": "abc123",
   "timestamp": 1715000000.0,
   "landmarks": [
     { "index": 11, "x": 0.45, "y": 0.32, "z": -0.12, "visibility": 0.98 },
-    { "index": 12, "x": 0.55, "y": 0.33, "z": -0.11, "visibility": 0.97 },
+    { "index": 12, "x": 0.55, "y": 0.33, "z": -0.11, "visibility": 0.97 }
     // ... all 33 MediaPipe landmarks
   ]
 }
-Response 200
+```
+
+#### Response (200 OK)
+```json
 {
   "form_score": 78,              // integer 0-100
   "rep_count": 4,                // total reps so far
@@ -53,16 +73,24 @@ Response 200
   "errors_detected": ["left_arm_low"],
   "is_safe": true               // false triggers safety alert on frontend
 }
+```
 
-Endpoint 3 — End Session
-POST /end-session
-Called when patient clicks End Session. Closes the record and returns full summary.
+---
 
-Request Body
+### 3. End Session
+`POST /end-session`
+
+Called when the patient clicks "End Session". Closes the record and returns the full session summary.
+
+#### Request Body
+```json
 {
   "session_id": "abc123"
 }
-Response 200
+```
+
+#### Response (200 OK)
+```json
 {
   "session_id": "abc123",
   "duration_seconds": 420,
@@ -75,12 +103,17 @@ Response 200
   ],
   "overall_rating": "good"     // poor | fair | good | excellent
 }
+```
 
-Endpoint 4 — Patient Sessions
-GET /patient/{patient_id}/sessions
-Returns all sessions for a patient. Used by clinician dashboard.
+---
 
-Response 200
+### 4. Patient Sessions
+`GET /patient/{patient_id}/sessions`
+
+Returns all sessions for a specific patient. Used by the clinician dashboard.
+
+#### Response (200 OK)
+```json
 {
   "patient_id": "p_001",
   "patient_name": "Ahmed Khan",
@@ -96,12 +129,17 @@ Response 200
     }
   ]
 }
+```
 
-Endpoint 5 — Patient Analytics
-GET /patient/{patient_id}/analytics
-Aggregated analytics for charts. Used by clinician dashboard.
+---
 
-Response 200
+### 5. Patient Analytics
+`GET /patient/{patient_id}/analytics`
+
+Aggregated analytics for charts. Used by the clinician dashboard.
+
+#### Response (200 OK)
+```json
 {
   "patient_id": "p_001",
   "score_trend": [
@@ -117,12 +155,17 @@ Response 200
   "total_reps": 38,
   "improvement_pct": 21
 }
+```
 
-Endpoint 6 — Session Details
-GET /session/{session_id}/details
-Full detail of a single session including frame-by-frame scores.
+---
 
-Response 200
+### 6. Session Details
+`GET /session/{session_id}/details`
+
+Full detail of a single session, including frame-by-frame scores.
+
+#### Response (200 OK)
+```json
 {
   "session_id": "abc123",
   "patient_id": "p_001",
@@ -140,33 +183,35 @@ Response 200
     { "error_type": "left_arm_low", "count": 8 }
   ]
 }
+```
 
-Error Responses
-All endpoints return this shape on error:
+---
+
+## Error Responses
+
+All endpoints return this structure on error:
+
+```json
 {
   "detail": "Human-readable error message",
   "error_code": "SESSION_NOT_FOUND"   // optional
 }
+```
 
-Method
-Endpoint
-Description
-—
-400
-Bad request / missing fields
-—
-404
-Session or patient not found
-—
-422
-Validation error (FastAPI default)
-—
-500
-Internal server error
+| HTTP Status | Description |
+| :--- | :--- |
+| 400 | Bad request / missing fields |
+| 404 | Session or patient not found |
+| 422 | Validation error (FastAPI default) |
+| 500 | Internal server error |
 
-CORS Setup (FastAPI)
+---
+
+## CORS Setup (FastAPI Example)
+
+```python
 from fastapi.middleware.cors import CORSMiddleware
- 
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:5173"],
@@ -174,5 +219,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+```
 
-Rehaby — Hackathon Build  |  May 14–19, 2026  |  Internal Use Only
+---
+
+**Rehaby — Hackathon Build** | May 14–19, 2026 | Internal Use Only
