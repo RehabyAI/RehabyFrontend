@@ -1,6 +1,9 @@
 import { useEffect, useRef } from 'react';
-import { drawConnectors, drawLandmarks } from '@mediapipe/drawing_utils';
-import { POSE_CONNECTIONS } from '@mediapipe/pose';
+import '@mediapipe/drawing_utils';
+import '@mediapipe/pose';
+
+const { drawConnectors, drawLandmarks } = window;
+const { POSE_CONNECTIONS } = window;
 
 export default function PoseCanvas({ results }) {
   const canvasRef = useRef(null);

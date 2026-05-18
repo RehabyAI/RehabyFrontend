@@ -1,6 +1,8 @@
 import { useEffect, useRef } from 'react';
-import { Pose } from '@mediapipe/pose';
-import { Camera } from '@mediapipe/camera_utils';
+import '@mediapipe/pose';
+import '@mediapipe/camera_utils';
+
+const { Pose, Camera } = window;
 
 export default function usePose(videoRef, onResults) {
   const poseRef = useRef(null);
